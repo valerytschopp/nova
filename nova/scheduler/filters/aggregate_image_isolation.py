@@ -43,10 +43,13 @@ class AggregateImageIsolation(filters.BaseHostFilter):
         with the image isolation property.
         """
         image_props = spec_obj.image.properties if spec_obj.image else {}
-        image_isolation = image_props.get(IMAGE_ISOLATION_PROPERTY, None)
+        try:
+            image_isolation = image_props.get(self.IMAGE_ISOLATION_PROPERTY)
+        except AttributeError:
+            image_isolation = None
 
         host_metadata = utils.aggregate_metadata_get_by_host(host_state)
-        host_isolations = host_metadata.get(IMAGE_ISOLATION_PROPERTY, None)
+        host_isolations = host_metadata.get(self.IMAGE_ISOLATION_PROPERTY, None)
 
         if not image_isolation:
             return True
@@ -60,7 +63,7 @@ class AggregateImageIsolation(filters.BaseHostFilter):
                       "Metadata %(prop)s does not exist, "
                       "or does not match %(isolation)s.",
                       {'host_state': host_state,
-                             'prop': IMAGE_ISOLATION_PROPERTY,
+                             'prop': self.IMAGE_ISOLATION_PROPERTY,
                         'isolation': image_isolation})
             return False
 
