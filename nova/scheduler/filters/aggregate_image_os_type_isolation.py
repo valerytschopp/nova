@@ -25,9 +25,9 @@ CONF = nova.conf.CONF
 LOG = logging.getLogger(__name__)
 
 
-class AggregateImageIsolation(filters.BaseHostFilter):
-    """Images with the property 'isolation_aggregate' value will be scheduled
-    only on the host aggregate with the matching metadata 'isolation_aggregate'
+class AggregateImageOsTypeIsolation(filters.BaseHostFilter):
+    """Images with the property 'os_type' value will be scheduled
+    only on the host aggregate with the matching metadata 'os_type'
     value.
     """
 
@@ -36,20 +36,20 @@ class AggregateImageIsolation(filters.BaseHostFilter):
 
     RUN_ON_REBUILD = True
 
-    IMAGE_ISOLATION_PROPERTY = 'isolation_aggregate'
-
     def host_passes(self, host_state, spec_obj):
-        """Checks a host in an aggregate that metadata value match
-        with the image isolation property.
+        """Checks a host in an aggregate that metadata 'os_type' value match
+        with the image 'os_type' property.
         """
+        isolation_property = 'os_type'
+
         image_props = spec_obj.image.properties if spec_obj.image else {}
         try:
-            image_isolation = image_props.get(self.IMAGE_ISOLATION_PROPERTY)
+            image_isolation = image_props.get(isolation_property)
         except AttributeError:
             image_isolation = None
 
         host_metadata = utils.aggregate_metadata_get_by_host(host_state)
-        host_isolations = host_metadata.get(self.IMAGE_ISOLATION_PROPERTY, None)
+        host_isolations = host_metadata.get(isolation_property, None)
 
         if not image_isolation:
             return True
@@ -63,7 +63,7 @@ class AggregateImageIsolation(filters.BaseHostFilter):
                       "Metadata %(prop)s does not exist, "
                       "or does not match %(isolation)s.",
                       {'host_state': host_state,
-                             'prop': self.IMAGE_ISOLATION_PROPERTY,
+                             'prop': isolation_property,
                         'isolation': image_isolation})
             return False
 
