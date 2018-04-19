@@ -14,21 +14,18 @@
 
 from oslo_log import log as logging
 
-
-import nova.conf
-from nova.i18n import _LW
 from nova.scheduler import filters
 from nova.scheduler.filters import utils
-
-CONF = nova.conf.CONF
 
 LOG = logging.getLogger(__name__)
 
 
 class AggregateImageOsTypeIsolation(filters.BaseHostFilter):
     """Images with the property 'os_type' value will be scheduled
-    only on the host aggregate with the matching metadata 'os_type'
+    ONLY on the host aggregate with the matching metadata 'os_type'
     value.
+    Scheduling will fail if no host aggregate matches the image 'os_type'
+    property.
     """
 
     # Aggregate data and instance type does not change within a request
@@ -59,8 +56,8 @@ class AggregateImageOsTypeIsolation(filters.BaseHostFilter):
             image_isolation not in host_isolations):
             # no host/aggregate isolation property
             # or image_isolation is not in the host_isolations
-            LOG.debug("%(host_state)s fails image isolation. "
-                      "Metadata %(prop)s does not exist, "
+            LOG.debug("%(host_state)s fails image os_type isolation. "
+                      "Host aggregate metadata %(prop)s does not exist, "
                       "or does not match %(isolation)s.",
                       {'host_state': host_state,
                              'prop': isolation_property,
