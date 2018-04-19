@@ -20,24 +20,24 @@ from nova.scheduler.filters import utils
 LOG = logging.getLogger(__name__)
 
 
-class AggregateImageOsTypeIsolation(filters.BaseHostFilter):
-    """Images with the property 'os_type' value will be scheduled
-    ONLY on the host aggregate with the matching metadata 'os_type'
+class AggregateImageOsDistroIsolation(filters.BaseHostFilter):
+    """Images with the property 'os_distro' value will be scheduled
+    ONLY on the host aggregate with the matching metadata 'os_distro'
     value.
-    Scheduling will fail if no host aggregate matches the image 'os_type'
-    property.
+    Scheduling will fail if no host aggregate matches the image's
+    'os_distro' property.
     """
 
-    # Aggregate data and instance type does not change within a request
+    # Aggregate data and instance type do not change within a request
     run_filter_once_per_request = True
 
     RUN_ON_REBUILD = True
 
     def host_passes(self, host_state, spec_obj):
-        """Checks a host in an aggregate that metadata 'os_type' value match
-        with the image 'os_type' property.
+        """Checks that the host is in an aggregate whose metadata 'os_distro'
+        value matches the image's 'os_distro' property.
         """
-        isolation_property = 'os_type'
+        isolation_property = 'os_distro'
 
         image_props = spec_obj.image.properties if spec_obj.image else {}
         try:
@@ -49,19 +49,20 @@ class AggregateImageOsTypeIsolation(filters.BaseHostFilter):
         host_isolations = host_metadata.get(isolation_property, None)
 
         if not image_isolation:
+            # image without the 'os_distro' property can be scheduled
+            # on any host
             return True
 
-        # image have isolation property
-        if (not host_isolations or
-            image_isolation not in host_isolations):
-            # no host/aggregate isolation property
+        # image has isolation property os_distro
+        if not host_isolations or image_isolation not in host_isolations:
+            # no host/aggregate isolation metadata
             # or image_isolation is not in the host_isolations
-            LOG.debug("%(host_state)s fails image os_type isolation. "
+            LOG.debug("%(host_state)s fails image os_distro isolation. "
                       "Host aggregate metadata %(prop)s does not exist, "
-                      "or does not match %(isolation)s.",
+                      "or does not match image %(isolation)s.",
                       {'host_state': host_state,
-                             'prop': isolation_property,
-                        'isolation': image_isolation})
+                       'prop': isolation_property,
+                       'isolation': image_isolation})
             return False
 
         return True
