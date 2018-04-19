@@ -37,16 +37,16 @@ class AggregateImageOsDistroIsolation(filters.BaseHostFilter):
         """Checks that the host is in an aggregate whose metadata 'os_distro'
         value matches the image's 'os_distro' property.
         """
-        isolation_property = 'os_distro'
+        ISOLATION_PROPERTY = 'os_distro'
 
         image_props = spec_obj.image.properties if spec_obj.image else {}
         try:
-            image_isolation = image_props.get(isolation_property)
+            image_isolation = image_props.get(ISOLATION_PROPERTY)
         except AttributeError:
             image_isolation = None
 
         host_metadata = utils.aggregate_metadata_get_by_host(host_state)
-        host_isolations = host_metadata.get(isolation_property, None)
+        host_isolations = host_metadata.get(ISOLATION_PROPERTY, None)
 
         if not image_isolation:
             # image without the 'os_distro' property can be scheduled
@@ -61,7 +61,7 @@ class AggregateImageOsDistroIsolation(filters.BaseHostFilter):
                       "Host aggregate metadata %(prop)s does not exist, "
                       "or does not match image %(isolation)s.",
                       {'host_state': host_state,
-                       'prop': isolation_property,
+                       'prop': ISOLATION_PROPERTY,
                        'isolation': image_isolation})
             return False
 
